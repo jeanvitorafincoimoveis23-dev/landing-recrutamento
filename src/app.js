@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "5500000000000";
+const WHATSAPP_NUMBER = "5541920053024";
 const WHATSAPP_MESSAGE = "Olá! Vim pela landing de recrutamento e quero tirar uma dúvida sobre a vaga.";
 
 const form = document.querySelector("#applicationForm");
