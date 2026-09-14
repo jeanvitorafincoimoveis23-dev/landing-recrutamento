@@ -1,0 +1,10 @@
+dist/
+node_modules/
+.env
+.env.local
+.vercel/
+work/
+outputs/
+public/hero-recruitment.png
+
+.vercel
