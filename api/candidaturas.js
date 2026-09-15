@@ -27,6 +27,30 @@ function buildPayload(body) {
   };
 }
 
+async function sendToSpreadsheet(payload) {
+  const webhookUrl = process.env.GOOGLE_SHEETS_WEBHOOK_URL;
+
+  if (!webhookUrl) {
+    return { enabled: false };
+  }
+
+  const response = await fetch(webhookUrl, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      received_at: new Date().toISOString(),
+      ...payload
+    })
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Planilha retornou ${response.status}: ${details}`);
+  }
+
+  return { enabled: true };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     res.setHeader("allow", "POST");
@@ -71,7 +95,15 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: "Não foi possível salvar a candidatura.", details });
     }
 
-    return res.status(200).json({ ok: true });
+    let spreadsheet = { enabled: false };
+    try {
+      spreadsheet = await sendToSpreadsheet(payload);
+    } catch (error) {
+      console.error("Erro ao enviar candidatura para a planilha:", error);
+      spreadsheet = { enabled: true, error: true };
+    }
+
+    return res.status(200).json({ ok: true, spreadsheet });
   } catch (error) {
     return res.status(500).json({ error: "Erro ao processar a candidatura." });
   }
